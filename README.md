@@ -40,3 +40,22 @@ Students can securely register, log in, raise complaints, and track their compla
 ### Deployment
 - Vercel
 - Render
+- ---
+
+# 🌐 Live Demo
+
+## Frontend
+
+https://campusflow-frontend-green.vercel.app
+
+## Backend API
+
+https://campusflow-yubf.onrender.com
+
+---
+
+# 👨‍💻 Author
+
+**Kommavarapu Naveen Babu**
+
+- GitHub: https://github.com/Naveenbabu45
