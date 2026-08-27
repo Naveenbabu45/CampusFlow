@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Search, RefreshCw, Filter } from "lucide-react";
+import { Search, RefreshCw, MessageSquare } from "lucide-react";
 import { toast } from "react-hot-toast";
 import API from "../services/api";
+
 import AdminLayout from "../layouts/AdminLayout";
 import StatusBadge from "../components/StatusBadge";
 
@@ -12,6 +13,9 @@ function AllComplaints() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
 
+  // ================================
+  // Fetch Complaints
+  // ================================
   useEffect(() => {
     fetchComplaints();
   }, []);
@@ -30,16 +34,19 @@ function AllComplaints() {
 
       setComplaints(data);
     } catch (err) {
-      console.log(err);
+      console.error(err);
       toast.error("Unable to fetch complaints");
     } finally {
       setLoading(false);
     }
   };
 
-  const updateStatus = async (id, status) => {
+  // ================================
+  // Update Status + Remarks
+  // ================================
+  const updateComplaint = async (id, status, remarks) => {
     const ok = window.confirm(
-      "Change complaint status?"
+      "Are you sure you want to update this complaint?"
     );
 
     if (!ok) return;
@@ -49,7 +56,10 @@ function AllComplaints() {
 
       await API.put(
         `/complaints/${id}`,
-        { status },
+        {
+          status,
+          remarks,
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -57,15 +67,22 @@ function AllComplaints() {
         }
       );
 
-      toast.success("Status Updated");
+      toast.success("Complaint Updated Successfully");
 
       fetchComplaints();
     } catch (err) {
-      console.log(err);
-      toast.error("Status Update Failed");
+      console.error("Update Error:", err);
+
+      toast.error(
+        err?.response?.data?.message ||
+          "Complaint Update Failed"
+      );
     }
   };
 
+  // ================================
+  // Search + Filter
+  // ================================
   const filtered = useMemo(() => {
     return complaints.filter((item) => {
       const query = search.toLowerCase();
@@ -85,10 +102,11 @@ function AllComplaints() {
 
   return (
     <AdminLayout>
-
       <div className="space-y-8">
 
-        {/* Header */}
+        {/* ================================
+            Header
+        ================================= */}
 
         <div className="rounded-3xl bg-gradient-to-r from-slate-900 to-slate-700 p-8 text-white shadow-xl">
 
@@ -102,11 +120,13 @@ function AllComplaints() {
 
         </div>
 
-        {/* Top Cards */}
+        {/* ================================
+            Statistics Cards
+        ================================= */}
 
         <div className="grid gap-6 md:grid-cols-4">
 
-          <div className="rounded-3xl bg-blue-600 p-6 text-white">
+          <div className="rounded-3xl bg-blue-600 p-6 text-white shadow-lg">
 
             <p>Total Complaints</p>
 
@@ -116,7 +136,7 @@ function AllComplaints() {
 
           </div>
 
-          <div className="rounded-3xl bg-yellow-500 p-6 text-white">
+          <div className="rounded-3xl bg-yellow-500 p-6 text-white shadow-lg">
 
             <p>Pending</p>
 
@@ -130,31 +150,28 @@ function AllComplaints() {
 
           </div>
 
-          <div className="rounded-3xl bg-purple-600 p-6 text-white">
+          <div className="rounded-3xl bg-purple-600 p-6 text-white shadow-lg">
 
             <p>In Progress</p>
 
             <h2 className="mt-3 text-4xl font-bold">
               {
                 complaints.filter(
-                  (c) =>
-                    c.status ===
-                    "In Progress"
+                  (c) => c.status === "In Progress"
                 ).length
               }
             </h2>
 
           </div>
 
-          <div className="rounded-3xl bg-green-600 p-6 text-white">
+          <div className="rounded-3xl bg-green-600 p-6 text-white shadow-lg">
 
             <p>Resolved</p>
 
             <h2 className="mt-3 text-4xl font-bold">
               {
                 complaints.filter(
-                  (c) =>
-                    c.status === "Resolved"
+                  (c) => c.status === "Resolved"
                 ).length
               }
             </h2>
@@ -163,7 +180,9 @@ function AllComplaints() {
 
         </div>
 
-        {/* Search */}
+        {/* ================================
+            Search + Filter
+        ================================= */}
 
         <div className="rounded-3xl bg-white p-6 shadow-lg">
 
@@ -180,7 +199,7 @@ function AllComplaints() {
                 onChange={(e) =>
                   setSearch(e.target.value)
                 }
-                className="w-full rounded-xl border py-3 pl-12 pr-4"
+                className="w-full rounded-xl border py-3 pl-12 pr-4 outline-none focus:border-blue-500"
               />
 
             </div>
@@ -190,7 +209,7 @@ function AllComplaints() {
               onChange={(e) =>
                 setFilter(e.target.value)
               }
-              className="rounded-xl border px-5"
+              className="rounded-xl border px-5 py-3 outline-none"
             >
               <option>All</option>
               <option>Pending</option>
@@ -199,8 +218,9 @@ function AllComplaints() {
             </select>
 
             <button
+              type="button"
               onClick={fetchComplaints}
-              className="flex items-center gap-2 rounded-xl bg-slate-900 px-6 text-white"
+              className="flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-white transition hover:bg-slate-700"
             >
               <RefreshCw size={18} />
               Refresh
@@ -210,150 +230,271 @@ function AllComplaints() {
 
         </div>
 
-        {/* Table */}
+        {/* ================================
+            Complaints
+        ================================= */}
 
-        <div className="overflow-hidden rounded-3xl bg-white shadow-xl">
+        <div className="space-y-6">
 
-          <div className="overflow-x-auto">
+          {loading ? (
 
-            <table className="w-full">
+            <div className="rounded-3xl bg-white p-12 text-center shadow-xl">
+              <p className="text-gray-500">
+                Loading complaints...
+              </p>
+            </div>
 
-              <thead className="bg-slate-100">
+          ) : filtered.length === 0 ? (
 
-                <tr>
+            <div className="rounded-3xl bg-white p-12 text-center shadow-xl">
+              <p className="text-gray-500">
+                No Complaints Found
+              </p>
+            </div>
 
-                  <th className="p-4 text-left">Student</th>
+          ) : (
 
-                  <th className="p-4 text-left">Complaint</th>
+            filtered.map((item) => (
 
-                  <th className="p-4 text-left">Category</th>
+              <div
+                key={item._id}
+                className="rounded-3xl bg-white p-6 shadow-xl transition hover:shadow-2xl"
+              >
 
-                  <th className="p-4 text-left">Priority</th>
+                {/* ================================
+                    Complaint Header
+                ================================= */}
 
-                  <th className="p-4 text-left">Location</th>
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
 
-                  <th className="p-4 text-left">Status</th>
+                  <div>
 
-                  <th className="p-4 text-left">Action</th>
+                    <p className="text-sm font-medium text-blue-600">
+                      Student
+                    </p>
 
-                </tr>
+                    <h2 className="text-xl font-bold text-slate-800">
+                      {item.student?.name || "Unknown Student"}
+                    </h2>
 
-              </thead>
+                    <p className="text-sm text-gray-500">
+                      {item.student?.email || ""}
+                    </p>
 
-              <tbody>
-                                {loading ? (
+                  </div>
 
-                  <tr>
+                  <StatusBadge status={item.status} />
 
-                    <td
-                      colSpan="7"
-                      className="py-12 text-center text-gray-500"
+                </div>
+
+                {/* ================================
+                    Complaint Details
+                ================================= */}
+
+                <div className="mt-6 grid gap-5 md:grid-cols-2">
+
+                  <div>
+
+                    <p className="text-sm font-medium text-gray-500">
+                      Complaint
+                    </p>
+
+                    <h3 className="mt-1 text-lg font-semibold">
+                      {item.title}
+                    </h3>
+
+                  </div>
+
+                  <div>
+
+                    <p className="text-sm font-medium text-gray-500">
+                      Category
+                    </p>
+
+                    <p className="mt-1 font-medium">
+                      {item.category}
+                    </p>
+
+                  </div>
+
+                  <div>
+
+                    <p className="text-sm font-medium text-gray-500">
+                      Priority
+                    </p>
+
+                    <span
+                      className={`mt-1 inline-block rounded-full px-3 py-1 text-sm font-medium text-white ${
+                        item.priority === "High"
+                          ? "bg-red-500"
+                          : item.priority === "Medium"
+                          ? "bg-yellow-500"
+                          : "bg-green-500"
+                      }`}
                     >
-                      Loading complaints...
-                    </td>
+                      {item.priority}
+                    </span>
 
-                  </tr>
+                  </div>
 
-                ) : filtered.length === 0 ? (
+                  <div>
 
-                  <tr>
+                    <p className="text-sm font-medium text-gray-500">
+                      Location
+                    </p>
 
-                    <td
-                      colSpan="7"
-                      className="py-12 text-center text-gray-500"
-                    >
-                      No Complaints Found
-                    </td>
+                    <p className="mt-1 font-medium">
+                      {item.location || "-"}
+                    </p>
 
-                  </tr>
+                  </div>
 
-                ) : (
+                </div>
 
-                  filtered.map((item) => (
+                {/* ================================
+                    Description
+                ================================= */}
 
-                    <tr
-                      key={item._id}
-                      className="border-b transition hover:bg-slate-50"
-                    >
+                <div className="mt-5 rounded-2xl bg-slate-50 p-5">
 
-                      <td className="p-4 font-medium">
-                        {item.student?.name || "Unknown"}
-                      </td>
+                  <p className="text-sm font-semibold text-gray-500">
+                    Description
+                  </p>
 
-                      <td className="max-w-xs p-4">
-                        <div className="font-semibold">
-                          {item.title}
-                        </div>
+                  <p className="mt-2 whitespace-pre-wrap text-gray-700">
+                    {item.description}
+                  </p>
 
-                        <div className="mt-1 text-sm text-gray-500">
-                          {item.description}
-                        </div>
-                      </td>
+                </div>
 
-                      <td className="p-4">
-                        {item.category}
-                      </td>
+                {/* ================================
+                    Admin Update Section
+                ================================= */}
 
-                      <td className="p-4">
+                <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50 p-5">
 
-                        <span
-                          className={`rounded-full px-3 py-1 text-sm text-white ${
-                            item.priority === "High"
-                              ? "bg-red-500"
-                              : item.priority === "Medium"
-                              ? "bg-yellow-500"
-                              : "bg-green-500"
-                          }`}
-                        >
-                          {item.priority}
-                        </span>
+                  <div className="mb-4 flex items-center gap-2">
 
-                      </td>
+                    <MessageSquare className="h-5 w-5 text-blue-600" />
 
-                      <td className="p-4">
-                        {item.location || "-"}
-                      </td>
+                    <h3 className="text-lg font-bold text-slate-800">
+                      Admin Response
+                    </h3>
 
-                      <td className="p-4">
-                        <StatusBadge
-                          status={item.status}
-                        />
-                      </td>
+                  </div>
 
-                      <td className="p-4">
+                  <div className="grid gap-5 md:grid-cols-2">
 
-                        <select
-                          value={item.status}
-                          onChange={(e) =>
-                            updateStatus(
-                              item._id,
-                              e.target.value
-                            )
-                          }
-                          className="rounded-lg border px-3 py-2"
-                        >
-                          <option>Pending</option>
-                          <option>In Progress</option>
-                          <option>Resolved</option>
-                        </select>
+                    {/* Status */}
 
-                      </td>
+                    <div>
 
-                    </tr>
+                      <label className="mb-2 block text-sm font-semibold text-gray-700">
+                        Complaint Status
+                      </label>
 
-                  ))
+                      <select
+                        id={`status-${item._id}`}
+                        defaultValue={item.status}
+                        className="w-full rounded-xl border bg-white px-4 py-3 outline-none focus:border-blue-500"
+                      >
+                        <option value="Pending">
+                          Pending
+                        </option>
 
+                        <option value="In Progress">
+                          In Progress
+                        </option>
+
+                        <option value="Resolved">
+                          Resolved
+                        </option>
+
+                      </select>
+
+                    </div>
+
+                    {/* Remarks */}
+
+                    <div>
+
+                      <label className="mb-2 block text-sm font-semibold text-gray-700">
+                        Remarks
+                      </label>
+
+                      <textarea
+                        id={`remarks-${item._id}`}
+                        defaultValue={item.remarks || ""}
+                        rows={3}
+                        placeholder="Enter remarks for the student..."
+                        className="w-full resize-none rounded-xl border bg-white px-4 py-3 outline-none focus:border-blue-500"
+                      />
+
+                    </div>
+
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const statusElement =
+                        document.getElementById(
+                          `status-${item._id}`
+                        );
+
+                      const remarksElement =
+                        document.getElementById(
+                          `remarks-${item._id}`
+                        );
+
+                      const status =
+                        statusElement?.value || item.status;
+
+                      const remarks =
+                        remarksElement?.value || "";
+
+                      updateComplaint(
+                        item._id,
+                        status,
+                        remarks
+                      );
+                    }}
+                    className="mt-5 rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
+                  >
+                    Update Complaint
+                  </button>
+
+                </div>
+
+                {/* ================================
+                    Existing Remarks
+                ================================= */}
+
+                {item.remarks && (
+                  <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-5">
+
+                    <p className="text-sm font-semibold text-green-700">
+                      Current Admin Remarks
+                    </p>
+
+                    <p className="mt-2 whitespace-pre-wrap text-gray-700">
+                      {item.remarks}
+                    </p>
+
+                  </div>
                 )}
 
-              </tbody>
+              </div>
 
-            </table>
+            ))
 
-          </div>
+          )}
 
         </div>
 
-        {/* Footer Summary */}
+        {/* ================================
+            Footer Summary
+        ================================= */}
 
         <div className="rounded-3xl bg-white p-6 shadow-lg">
 
@@ -387,8 +528,7 @@ function AllComplaints() {
                 In Progress:{" "}
                 {
                   complaints.filter(
-                    (c) =>
-                      c.status === "In Progress"
+                    (c) => c.status === "In Progress"
                   ).length
                 }
               </p>
@@ -397,8 +537,7 @@ function AllComplaints() {
                 Resolved:{" "}
                 {
                   complaints.filter(
-                    (c) =>
-                      c.status === "Resolved"
+                    (c) => c.status === "Resolved"
                   ).length
                 }
               </p>
@@ -410,7 +549,6 @@ function AllComplaints() {
         </div>
 
       </div>
-
     </AdminLayout>
   );
 }

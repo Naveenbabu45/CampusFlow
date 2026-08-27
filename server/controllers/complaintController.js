@@ -21,6 +21,8 @@ const createComplaint = async (req, res) => {
       location,
       priority,
       image: "",
+      status: "Pending",
+      remarks: "",
     });
 
     res.status(201).json({
@@ -28,6 +30,8 @@ const createComplaint = async (req, res) => {
       complaint,
     });
   } catch (error) {
+    console.error("Create Complaint Error:", error);
+
     res.status(500).json({
       message: error.message,
     });
@@ -45,6 +49,8 @@ const getMyComplaints = async (req, res) => {
 
     res.status(200).json(complaints);
   } catch (error) {
+    console.error("Get My Complaints Error:", error);
+
     res.status(500).json({
       message: error.message,
     });
@@ -62,6 +68,8 @@ const getAllComplaints = async (req, res) => {
 
     res.status(200).json(complaints);
   } catch (error) {
+    console.error("Get All Complaints Error:", error);
+
     res.status(500).json({
       message: error.message,
     });
@@ -73,19 +81,45 @@ const getAllComplaints = async (req, res) => {
 // ================================
 const updateComplaintStatus = async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, remarks } = req.body;
+
+    // Validate status
+    if (
+      status &&
+      !["Pending", "In Progress", "Resolved"].includes(status)
+    ) {
+      return res.status(400).json({
+        message: "Invalid complaint status",
+      });
+    }
 
     const complaint = await Complaint.findByIdAndUpdate(
       req.params.id,
-      { status },
-      { new: true }
+      {
+        ...(status !== undefined && { status }),
+        ...(remarks !== undefined && {
+          remarks: remarks.trim(),
+        }),
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
     );
 
+    if (!complaint) {
+      return res.status(404).json({
+        message: "Complaint not found",
+      });
+    }
+
     res.status(200).json({
-      message: "Complaint status updated successfully",
+      message: "Complaint updated successfully",
       complaint,
     });
   } catch (error) {
+    console.error("Update Complaint Error:", error);
+
     res.status(500).json({
       message: error.message,
     });
@@ -118,14 +152,17 @@ const getComplaintStats = async (req, res) => {
       resolved,
     });
   } catch (error) {
-  console.error("Create Complaint Error:", error);
+    console.error("Get Complaint Stats Error:", error);
 
-  res.status(500).json({
-    message: error.message,
-  });
-}
+    res.status(500).json({
+      message: error.message,
+    });
+  }
 };
 
+// ================================
+// Export Controllers
+// ================================
 module.exports = {
   createComplaint,
   getMyComplaints,

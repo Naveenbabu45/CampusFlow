@@ -24,12 +24,12 @@ function MyComplaints() {
 
       setComplaints(data);
     } catch (err) {
-      console.log(err);
+      console.error("Fetch Complaints Error:", err);
     }
   };
 
   const filtered = complaints.filter((item) => {
-    const matchTitle = item.title
+    const matchTitle = (item.title || "")
       .toLowerCase()
       .includes(search.toLowerCase());
 
@@ -43,19 +43,29 @@ function MyComplaints() {
     <StudentLayout>
       <div className="space-y-6">
 
+        {/* ================================
+            Header
+        ================================= */}
+
         <div>
           <h1 className="text-4xl font-bold">
             📋 My Complaints
           </h1>
 
-          <p className="text-gray-500 mt-2">
-            Track all your complaints.
+          <p className="mt-2 text-gray-500">
+            Track all your complaints and admin responses.
           </p>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-lg p-6">
+        {/* ================================
+            Main Card
+        ================================= */}
 
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="rounded-3xl bg-white p-6 shadow-lg">
+
+          {/* Search + Filter */}
+
+          <div className="mb-6 flex flex-col gap-4 md:flex-row">
 
             <input
               type="text"
@@ -64,7 +74,7 @@ function MyComplaints() {
               onChange={(e) =>
                 setSearch(e.target.value)
               }
-              className="flex-1 border rounded-xl px-4 py-3"
+              className="flex-1 rounded-xl border px-4 py-3 outline-none focus:border-blue-500"
             />
 
             <select
@@ -72,27 +82,59 @@ function MyComplaints() {
               onChange={(e) =>
                 setFilter(e.target.value)
               }
-              className="border rounded-xl px-4 py-3"
+              className="rounded-xl border px-4 py-3 outline-none focus:border-blue-500"
             >
-              <option>All</option>
-              <option>Pending</option>
-              <option>In Progress</option>
-              <option>Resolved</option>
+              <option value="All">
+                All
+              </option>
+
+              <option value="Pending">
+                Pending
+              </option>
+
+              <option value="In Progress">
+                In Progress
+              </option>
+
+              <option value="Resolved">
+                Resolved
+              </option>
             </select>
 
           </div>
 
+          {/* ================================
+              Table
+          ================================= */}
+
           <div className="overflow-x-auto">
 
-            <table className="w-full">
+            <table className="w-full min-w-[850px]">
 
               <thead className="bg-slate-100">
 
                 <tr>
-                  <th className="text-left p-4">Title</th>
-                  <th className="text-left p-4">Category</th>
-                  <th className="text-left p-4">Status</th>
-                  <th className="text-left p-4">Date</th>
+
+                  <th className="p-4 text-left">
+                    Title
+                  </th>
+
+                  <th className="p-4 text-left">
+                    Category
+                  </th>
+
+                  <th className="p-4 text-left">
+                    Status
+                  </th>
+
+                  <th className="p-4 text-left">
+                    Admin Remarks
+                  </th>
+
+                  <th className="p-4 text-left">
+                    Date
+                  </th>
+
                 </tr>
 
               </thead>
@@ -104,8 +146,8 @@ function MyComplaints() {
                   <tr>
 
                     <td
-                      colSpan="4"
-                      className="text-center py-10 text-gray-500"
+                      colSpan="5"
+                      className="py-10 text-center text-gray-500"
                     >
                       No Complaints Found
                     </td>
@@ -118,27 +160,75 @@ function MyComplaints() {
 
                     <tr
                       key={item._id}
-                      className="border-b hover:bg-slate-50"
+                      className="border-b transition hover:bg-slate-50"
                     >
 
-                      <td className="p-4 font-medium">
-                        {item.title}
+                      {/* Title */}
+
+                      <td className="p-4">
+
+                        <div className="font-semibold">
+                          {item.title}
+                        </div>
+
+                        {item.description && (
+                          <div className="mt-1 max-w-xs text-sm text-gray-500">
+                            {item.description}
+                          </div>
+                        )}
+
                       </td>
+
+                      {/* Category */}
 
                       <td className="p-4">
                         {item.category}
                       </td>
 
+                      {/* Status */}
+
                       <td className="p-4">
+
                         <StatusBadge
                           status={item.status}
                         />
+
                       </td>
 
+                      {/* Admin Remarks */}
+
                       <td className="p-4">
-                        {new Date(
-                          item.createdAt
-                        ).toLocaleDateString()}
+
+                        {item.remarks ? (
+
+                          <div className="max-w-xs rounded-xl border border-blue-200 bg-blue-50 p-3">
+
+                            <p className="whitespace-pre-wrap text-sm text-gray-700">
+                              {item.remarks}
+                            </p>
+
+                          </div>
+
+                        ) : (
+
+                          <span className="text-sm italic text-gray-400">
+                            No remarks yet
+                          </span>
+
+                        )}
+
+                      </td>
+
+                      {/* Date */}
+
+                      <td className="p-4 whitespace-nowrap">
+
+                        {item.createdAt
+                          ? new Date(
+                              item.createdAt
+                            ).toLocaleDateString()
+                          : "-"}
+
                       </td>
 
                     </tr>
