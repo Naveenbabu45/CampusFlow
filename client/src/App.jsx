@@ -17,13 +17,21 @@ function App() {
   return (
     <Routes>
 
-      {/* Public Routes */}
+      {/* ================================
+          Public Routes
+      ================================= */}
 
       <Route path="/" element={<Login />} />
 
-      <Route path="/register" element={<Register />} />
+      <Route
+        path="/register"
+        element={<Register />}
+      />
 
-      {/* Student */}
+
+      {/* ================================
+          Student Routes
+      ================================= */}
 
       <Route
         path="/student-dashboard"
@@ -61,7 +69,10 @@ function App() {
         }
       />
 
-      {/* Admin */}
+
+      {/* ================================
+          Admin Routes
+      ================================= */}
 
       <Route
         path="/admin-dashboard"
@@ -72,6 +83,17 @@ function App() {
         }
       />
 
+      {/* New Admin Complaints Route */}
+      <Route
+        path="/admin-dashboard/complaints"
+        element={
+          <ProtectedRoute role="admin">
+            <AllComplaints />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Keep old route also working */}
       <Route
         path="/all-complaints"
         element={

@@ -66,7 +66,25 @@ const getAllComplaints = async (req, res) => {
       .populate("student", "name email")
       .sort({ createdAt: -1 });
 
-    res.status(200).json(complaints);
+    // Convert backend "student" field
+    // to frontend "createdBy" field
+    const formattedComplaints = complaints.map((complaint) => ({
+      _id: complaint._id,
+      title: complaint.title,
+      description: complaint.description,
+      category: complaint.category,
+      status: complaint.status,
+      priority: complaint.priority,
+      location: complaint.location,
+      image: complaint.image,
+      remarks: complaint.remarks,
+      createdAt: complaint.createdAt,
+      updatedAt: complaint.updatedAt,
+
+      createdBy: complaint.student,
+    }));
+
+    res.status(200).json(formattedComplaints);
   } catch (error) {
     console.error("Get All Complaints Error:", error);
 
@@ -105,7 +123,7 @@ const updateComplaintStatus = async (req, res) => {
         new: true,
         runValidators: true,
       }
-    );
+    ).populate("student", "name email");
 
     if (!complaint) {
       return res.status(404).json({
@@ -115,7 +133,22 @@ const updateComplaintStatus = async (req, res) => {
 
     res.status(200).json({
       message: "Complaint updated successfully",
-      complaint,
+
+      complaint: {
+        _id: complaint._id,
+        title: complaint.title,
+        description: complaint.description,
+        category: complaint.category,
+        status: complaint.status,
+        priority: complaint.priority,
+        location: complaint.location,
+        image: complaint.image,
+        remarks: complaint.remarks,
+        createdAt: complaint.createdAt,
+        updatedAt: complaint.updatedAt,
+
+        createdBy: complaint.student,
+      },
     });
   } catch (error) {
     console.error("Update Complaint Error:", error);

@@ -24,7 +24,7 @@ function AllComplaints() {
     try {
       setLoading(true);
 
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("campusflow_token");
 
       const { data } = await API.get("/complaints", {
         headers: {
@@ -32,9 +32,13 @@ function AllComplaints() {
         },
       });
 
+      // DEBUG: Check student data coming from backend
+      console.log("COMPLAINT DATA:", data);
+
       setComplaints(data);
     } catch (err) {
-      console.error(err);
+      console.error("Fetch Complaints Error:", err);
+
       toast.error("Unable to fetch complaints");
     } finally {
       setLoading(false);
@@ -52,7 +56,7 @@ function AllComplaints() {
     if (!ok) return;
 
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("campusflow_token");
 
       await API.put(
         `/complaints/${id}`,
@@ -87,10 +91,21 @@ function AllComplaints() {
     return complaints.filter((item) => {
       const query = search.toLowerCase();
 
+      const studentName =
+        typeof item.student === "object"
+          ? item.student?.name || ""
+          : "";
+
+      const studentEmail =
+        typeof item.student === "object"
+          ? item.student?.email || ""
+          : "";
+
       const matchSearch =
         item.title?.toLowerCase().includes(query) ||
         item.category?.toLowerCase().includes(query) ||
-        item.student?.name?.toLowerCase().includes(query);
+        studentName.toLowerCase().includes(query) ||
+        studentEmail.toLowerCase().includes(query);
 
       const matchFilter =
         filter === "All" ||
@@ -239,254 +254,274 @@ function AllComplaints() {
           {loading ? (
 
             <div className="rounded-3xl bg-white p-12 text-center shadow-xl">
+
               <p className="text-gray-500">
                 Loading complaints...
               </p>
+
             </div>
 
           ) : filtered.length === 0 ? (
 
             <div className="rounded-3xl bg-white p-12 text-center shadow-xl">
+
               <p className="text-gray-500">
                 No Complaints Found
               </p>
+
             </div>
 
           ) : (
 
-            filtered.map((item) => (
+            filtered.map((item) => {
 
-              <div
-                key={item._id}
-                className="rounded-3xl bg-white p-6 shadow-xl transition hover:shadow-2xl"
-              >
+              const studentName =
+                typeof item.student === "object"
+                  ? item.student?.name
+                  : null;
 
-                {/* ================================
-                    Complaint Header
-                ================================= */}
+              const studentEmail =
+                typeof item.student === "object"
+                  ? item.student?.email
+                  : null;
 
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              return (
+                <div
+                  key={item._id}
+                  className="rounded-3xl bg-white p-6 shadow-xl transition hover:shadow-2xl"
+                >
 
-                  <div>
+                  {/* ================================
+                      Complaint Header
+                  ================================= */}
 
-                    <p className="text-sm font-medium text-blue-600">
-                      Student
-                    </p>
-
-                    <h2 className="text-xl font-bold text-slate-800">
-                      {item.student?.name || "Unknown Student"}
-                    </h2>
-
-                    <p className="text-sm text-gray-500">
-                      {item.student?.email || ""}
-                    </p>
-
-                  </div>
-
-                  <StatusBadge status={item.status} />
-
-                </div>
-
-                {/* ================================
-                    Complaint Details
-                ================================= */}
-
-                <div className="mt-6 grid gap-5 md:grid-cols-2">
-
-                  <div>
-
-                    <p className="text-sm font-medium text-gray-500">
-                      Complaint
-                    </p>
-
-                    <h3 className="mt-1 text-lg font-semibold">
-                      {item.title}
-                    </h3>
-
-                  </div>
-
-                  <div>
-
-                    <p className="text-sm font-medium text-gray-500">
-                      Category
-                    </p>
-
-                    <p className="mt-1 font-medium">
-                      {item.category}
-                    </p>
-
-                  </div>
-
-                  <div>
-
-                    <p className="text-sm font-medium text-gray-500">
-                      Priority
-                    </p>
-
-                    <span
-                      className={`mt-1 inline-block rounded-full px-3 py-1 text-sm font-medium text-white ${
-                        item.priority === "High"
-                          ? "bg-red-500"
-                          : item.priority === "Medium"
-                          ? "bg-yellow-500"
-                          : "bg-green-500"
-                      }`}
-                    >
-                      {item.priority}
-                    </span>
-
-                  </div>
-
-                  <div>
-
-                    <p className="text-sm font-medium text-gray-500">
-                      Location
-                    </p>
-
-                    <p className="mt-1 font-medium">
-                      {item.location || "-"}
-                    </p>
-
-                  </div>
-
-                </div>
-
-                {/* ================================
-                    Description
-                ================================= */}
-
-                <div className="mt-5 rounded-2xl bg-slate-50 p-5">
-
-                  <p className="text-sm font-semibold text-gray-500">
-                    Description
-                  </p>
-
-                  <p className="mt-2 whitespace-pre-wrap text-gray-700">
-                    {item.description}
-                  </p>
-
-                </div>
-
-                {/* ================================
-                    Admin Update Section
-                ================================= */}
-
-                <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50 p-5">
-
-                  <div className="mb-4 flex items-center gap-2">
-
-                    <MessageSquare className="h-5 w-5 text-blue-600" />
-
-                    <h3 className="text-lg font-bold text-slate-800">
-                      Admin Response
-                    </h3>
-
-                  </div>
-
-                  <div className="grid gap-5 md:grid-cols-2">
-
-                    {/* Status */}
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
 
                     <div>
 
-                      <label className="mb-2 block text-sm font-semibold text-gray-700">
-                        Complaint Status
-                      </label>
+                      <p className="text-sm font-medium text-blue-600">
+                        Raised By
+                      </p>
 
-                      <select
-                        id={`status-${item._id}`}
-                        defaultValue={item.status}
-                        className="w-full rounded-xl border bg-white px-4 py-3 outline-none focus:border-blue-500"
+                      <h2 className="text-xl font-bold text-slate-800">
+                        {studentName || "Unknown Student"}
+                      </h2>
+
+                      <p className="text-sm text-gray-500">
+                        {studentEmail || ""}
+                      </p>
+
+                    </div>
+
+                    <StatusBadge status={item.status} />
+
+                  </div>
+
+                  {/* ================================
+                      Complaint Details
+                  ================================= */}
+
+                  <div className="mt-6 grid gap-5 md:grid-cols-2">
+
+                    <div>
+
+                      <p className="text-sm font-medium text-gray-500">
+                        Complaint
+                      </p>
+
+                      <h3 className="mt-1 text-lg font-semibold">
+                        {item.title}
+                      </h3>
+
+                    </div>
+
+                    <div>
+
+                      <p className="text-sm font-medium text-gray-500">
+                        Category
+                      </p>
+
+                      <p className="mt-1 font-medium">
+                        {item.category}
+                      </p>
+
+                    </div>
+
+                    <div>
+
+                      <p className="text-sm font-medium text-gray-500">
+                        Priority
+                      </p>
+
+                      <span
+                        className={`mt-1 inline-block rounded-full px-3 py-1 text-sm font-medium text-white ${
+                          item.priority === "High"
+                            ? "bg-red-500"
+                            : item.priority === "Medium"
+                            ? "bg-yellow-500"
+                            : "bg-green-500"
+                        }`}
                       >
-                        <option value="Pending">
-                          Pending
-                        </option>
-
-                        <option value="In Progress">
-                          In Progress
-                        </option>
-
-                        <option value="Resolved">
-                          Resolved
-                        </option>
-
-                      </select>
+                        {item.priority}
+                      </span>
 
                     </div>
 
-                    {/* Remarks */}
-
                     <div>
 
-                      <label className="mb-2 block text-sm font-semibold text-gray-700">
-                        Remarks
-                      </label>
+                      <p className="text-sm font-medium text-gray-500">
+                        Location
+                      </p>
 
-                      <textarea
-                        id={`remarks-${item._id}`}
-                        defaultValue={item.remarks || ""}
-                        rows={3}
-                        placeholder="Enter remarks for the student..."
-                        className="w-full resize-none rounded-xl border bg-white px-4 py-3 outline-none focus:border-blue-500"
-                      />
+                      <p className="mt-1 font-medium">
+                        {item.location || "-"}
+                      </p>
 
                     </div>
 
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const statusElement =
-                        document.getElementById(
-                          `status-${item._id}`
-                        );
+                  {/* ================================
+                      Description
+                  ================================= */}
 
-                      const remarksElement =
-                        document.getElementById(
-                          `remarks-${item._id}`
-                        );
+                  <div className="mt-5 rounded-2xl bg-slate-50 p-5">
 
-                      const status =
-                        statusElement?.value || item.status;
-
-                      const remarks =
-                        remarksElement?.value || "";
-
-                      updateComplaint(
-                        item._id,
-                        status,
-                        remarks
-                      );
-                    }}
-                    className="mt-5 rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
-                  >
-                    Update Complaint
-                  </button>
-
-                </div>
-
-                {/* ================================
-                    Existing Remarks
-                ================================= */}
-
-                {item.remarks && (
-                  <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-5">
-
-                    <p className="text-sm font-semibold text-green-700">
-                      Current Admin Remarks
+                    <p className="text-sm font-semibold text-gray-500">
+                      Description
                     </p>
 
                     <p className="mt-2 whitespace-pre-wrap text-gray-700">
-                      {item.remarks}
+                      {item.description}
                     </p>
 
                   </div>
-                )}
 
-              </div>
+                  {/* ================================
+                      Admin Update Section
+                  ================================= */}
 
-            ))
+                  <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+
+                    <div className="mb-4 flex items-center gap-2">
+
+                      <MessageSquare className="h-5 w-5 text-blue-600" />
+
+                      <h3 className="text-lg font-bold text-slate-800">
+                        Admin Response
+                      </h3>
+
+                    </div>
+
+                    <div className="grid gap-5 md:grid-cols-2">
+
+                      {/* Status */}
+
+                      <div>
+
+                        <label className="mb-2 block text-sm font-semibold text-gray-700">
+                          Complaint Status
+                        </label>
+
+                        <select
+                          id={`status-${item._id}`}
+                          defaultValue={item.status}
+                          className="w-full rounded-xl border bg-white px-4 py-3 outline-none focus:border-blue-500"
+                        >
+
+                          <option value="Pending">
+                            Pending
+                          </option>
+
+                          <option value="In Progress">
+                            In Progress
+                          </option>
+
+                          <option value="Resolved">
+                            Resolved
+                          </option>
+
+                        </select>
+
+                      </div>
+
+                      {/* Remarks */}
+
+                      <div>
+
+                        <label className="mb-2 block text-sm font-semibold text-gray-700">
+                          Remarks
+                        </label>
+
+                        <textarea
+                          id={`remarks-${item._id}`}
+                          defaultValue={item.remarks || ""}
+                          rows={3}
+                          placeholder="Enter remarks for the student..."
+                          className="w-full resize-none rounded-xl border bg-white px-4 py-3 outline-none focus:border-blue-500"
+                        />
+
+                      </div>
+
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+
+                        const statusElement =
+                          document.getElementById(
+                            `status-${item._id}`
+                          );
+
+                        const remarksElement =
+                          document.getElementById(
+                            `remarks-${item._id}`
+                          );
+
+                        const status =
+                          statusElement?.value ||
+                          item.status;
+
+                        const remarks =
+                          remarksElement?.value || "";
+
+                        updateComplaint(
+                          item._id,
+                          status,
+                          remarks
+                        );
+                      }}
+                      className="mt-5 rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
+                    >
+                      Update Complaint
+                    </button>
+
+                  </div>
+
+                  {/* ================================
+                      Existing Remarks
+                  ================================= */}
+
+                  {item.remarks && (
+
+                    <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-5">
+
+                      <p className="text-sm font-semibold text-green-700">
+                        Current Admin Remarks
+                      </p>
+
+                      <p className="mt-2 whitespace-pre-wrap text-gray-700">
+                        {item.remarks}
+                      </p>
+
+                    </div>
+
+                  )}
+
+                </div>
+              );
+            })
 
           )}
 
