@@ -1,60 +1,67 @@
 # 🎓 CampusFlow
 
+> A full-stack campus complaint management platform designed to simplify complaint reporting, tracking, and administration.
+
 CampusFlow is a Full-Stack Campus Complaint Management System developed to simplify the process of reporting and managing campus-related complaints.
 
 Students can securely register, log in, raise complaints, and track their complaint status, while administrators can efficiently manage, update, and resolve complaints through a dedicated admin dashboard.
 
 ---
 
-## ✨ Features
+## 🚀 Overview
 
-- 👨‍🎓 Student Portal
-- 👨‍💼 Admin Portal
-- 🔐 JWT Authentication
-- 📝 Raise Complaints
-- 📊 Complaint Status Tracking
-- ⚡ Responsive UI
-- ☁️ Cloud Deployment (Render + Vercel)
+CampusFlow provides a centralized platform for managing campus-related complaints.
+
+The system separates student and administrator workflows, allowing students to submit and monitor complaints while administrators can review, manage, update, and resolve them through a dedicated dashboard.
 
 ---
 
-## 🛠️ Tech Stack
+## ✨ Key Features
 
-### Frontend
-- React.js
-- Vite
-- Tailwind CSS
-- Axios
+### 👨‍🎓 Student Portal
 
-### Backend
-- Node.js
-- Express.js
+- Student registration and login
+- Secure authentication
+- Raise campus-related complaints
+- Track complaint status
+- Responsive user interface
 
-### Database
-- MongoDB Atlas
+### 👨‍💼 Admin Portal
 
-### Authentication
-- JWT (JSON Web Token)
-- bcrypt
+- Dedicated admin dashboard
+- View submitted complaints
+- Manage complaints
+- Update complaint status
+- Resolve complaints
 
-### Deployment
-- Vercel
-- Render
+### 🔐 Authentication & Security
 
----
+- JWT-based authentication
+- Password hashing using bcrypt
+- Protected application workflows
 
-## 🌐 Live Demo
+### ☁️ Deployment
 
-### Frontend
-https://campusflow-frontend-green.vercel.app
-
-### Backend API
-https://campusflow-yubf.onrender.com
+- Frontend deployed on Vercel
+- Backend deployed on Render
+- Database hosted using MongoDB Atlas
 
 ---
 
-## 👨‍💻 Author
+## 🏗️ System Architecture
 
-**Kommavarapu Naveen Babu**
+```mermaid
+flowchart LR
+    U[Students / Administrators]
+    F[React + Vite Frontend]
+    A[Express.js REST API]
+    J[JWT Authentication]
+    D[(MongoDB Atlas)]
 
-- GitHub: https://github.com/Naveenbabu45
+    U --> F
+    F --> A
+    A --> J
+    A --> D
+    D --> A
+    A --> F
+    F --> U
