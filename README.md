@@ -1,85 +1,116 @@
 # 🎓 CampusFlow
 
-> A full-stack campus complaint management platform designed to simplify complaint reporting, tracking, and administration.
+<p align="center">
+  <strong>A Full-Stack Campus Complaint Management System</strong>
+</p>
 
-CampusFlow is a Full-Stack Campus Complaint Management System developed to simplify the process of reporting and managing campus-related complaints.
+<p align="center">
+  Report • Track • Manage • Resolve
+</p>
 
-Students can securely register, log in, raise complaints, and track their complaint status, while administrators can efficiently manage, update, and resolve complaints through a dedicated admin dashboard.
-
----
-
-## 🚀 Overview
-
-CampusFlow provides a centralized platform for handling campus-related complaints.
-
-The system provides separate workflows for students and administrators:
-
-- Students can register, log in, submit complaints, and track their complaint status.
-- Administrators can access a dedicated dashboard to view, manage, update, and resolve complaints.
-
-The application is built using a modern full-stack architecture with React.js on the frontend, Node.js and Express.js on the backend, and MongoDB Atlas for data storage.
+<p align="center">
+  <a href="https://campusflow-frontend-green.vercel.app/">
+    <img src="https://img.shields.io/badge/Live%20Demo-Vercel-black?style=for-the-badge&logo=vercel" alt="Live Demo"/>
+  </a>
+  <img src="https://img.shields.io/badge/Frontend-React%20%2B%20TypeScript-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React"/>
+  <img src="https://img.shields.io/badge/Backend-Node.js%20%2B%20Express-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js"/>
+  <img src="https://img.shields.io/badge/Database-MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB"/>
+</p>
 
 ---
 
-## 🎯 Objectives
+## 📌 Overview
 
-- Simplify campus complaint submission
-- Provide students with complaint status tracking
-- Provide administrators with centralized complaint management
-- Implement secure user authentication
-- Build a responsive full-stack web application
-- Deploy the application using cloud platforms
+**CampusFlow** is a full-stack campus complaint management platform designed to simplify the process of reporting, tracking, reviewing, and resolving campus-related complaints.
 
----
+The system provides separate experiences for **students** and **administrators**.
 
-## ✨ Features
+Students can securely register, log in, submit complaints, track their complaints, and view their complaint details.
 
-### 👨‍🎓 Student Portal
+Administrators can review complaints submitted across the campus, identify the student who raised each complaint, filter complaints, update complaint status, and add administrative remarks.
 
-- Student registration
-- Student login
-- Secure authentication
-- Raise campus-related complaints
-- Track complaint status
-- Responsive user interface
-
-### 👨‍💼 Admin Portal
-
-- Dedicated admin dashboard
-- View submitted complaints
-- Review complaints
-- Manage complaints
-- Update complaint status
-- Resolve complaints
-
-### 🔐 Authentication & Security
-
-- JWT-based authentication
-- Password hashing using bcrypt
-- Protected application workflows
-- Secure communication between frontend and backend
-
-### ☁️ Cloud Deployment
-
-- Frontend deployed on Vercel
-- Backend deployed on Render
-- Database hosted using MongoDB Atlas
+The project focuses on creating a centralized, transparent, and user-friendly complaint management workflow.
 
 ---
 
-## 👥 User Roles
+# ✨ Key Features
+
+## 👨‍🎓 Student Features
+
+- 🔐 Secure student authentication
+- 📝 Submit new complaints
+- 🏷️ Categorize complaints
+- 📍 Specify complaint location
+- ⚡ Set complaint priority
+- 📋 View submitted complaints
+- 🔎 Search and filter complaints
+- 📊 Track complaint status
+- 👤 View and manage profile information
+- 🔔 User-friendly feedback and notifications
+- 📱 Responsive dashboard interface
+
+### Complaint Categories
+
+- Academic
+- Facilities
+- Hostel
+- Mess
+- Transport
+- Technical
+- Other
+
+### Complaint Priorities
+
+- Low
+- Medium
+- High
+
+### Complaint Status
+
+- Pending
+- In Progress
+- Resolved
+
+---
+
+## 👨‍💼 Admin Features
+
+- 🔐 Role-based administrator access
+- 📊 Admin dashboard
+- 📋 View all campus complaints
+- 👤 View the student who raised each complaint
+- 🔎 Search complaints by title or student
+- 🏷️ Filter by category
+- 📌 Filter by status
+- ⚡ View complaint priority
+- 📝 Update complaint status
+- 💬 Add administrative remarks
+- 📈 View complaint statistics
+- 📅 View complaint submission dates
+- 🔍 Open detailed complaint information
+
+---
+
+# 🏗️ System Architecture
+
+CampusFlow follows a modern **client-server architecture**.
 
 ```mermaid
-flowchart TD
-    A[CampusFlow] --> B[Student]
-    A --> C[Administrator]
+flowchart LR
 
-    B --> B1[Register / Login]
-    B --> B2[Raise Complaint]
-    B --> B3[Track Complaint Status]
+    A[👨‍🎓 Student] -->|HTTPS| B[🌐 React Frontend]
+    C[👨‍💼 Administrator] -->|HTTPS| B
 
-    C --> C1[Admin Login]
-    C --> C2[View Complaints]
-    C --> C3[Manage Complaints]
-    C --> C4[Update Status]
-    C --> C5[Resolve Complaints]
+    B -->|REST API<br/>Axios| D[⚙️ Node.js + Express Backend]
+
+    D -->|Authentication| E[🔐 JWT + bcrypt]
+    D -->|Database Operations| F[(🍃 MongoDB)]
+
+    D --> G[📦 Complaint Management]
+    G --> F
+
+    D --> H[📊 Statistics]
+    H --> F
+
+    B --> I[🚀 Vercel]
+    D --> J[☁️ Render]
