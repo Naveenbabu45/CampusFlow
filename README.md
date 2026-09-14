@@ -67,20 +67,19 @@ The application is built using a modern full-stack architecture with React.js on
 
 ---
 
-## 🏗️ System Architecture
+## 👥 User Roles
 
 ```mermaid
-flowchart LR
-    U[Students / Administrators]
-    FE[React + Vite Frontend]
-    API[Node.js + Express.js Backend]
-    AUTH[JWT Authentication]
-    DB[(MongoDB Atlas)]
+flowchart TD
+    A[CampusFlow] --> B[Student]
+    A --> C[Administrator]
 
-    U --> FE
-    FE --> API
-    API --> AUTH
-    API --> DB
-    DB --> API
-    API --> FE
-    FE --> U
+    B --> B1[Register / Login]
+    B --> B2[Raise Complaint]
+    B --> B3[Track Complaint Status]
+
+    C --> C1[Admin Login]
+    C --> C2[View Complaints]
+    C --> C3[Manage Complaints]
+    C --> C4[Update Status]
+    C --> C5[Resolve Complaints]
